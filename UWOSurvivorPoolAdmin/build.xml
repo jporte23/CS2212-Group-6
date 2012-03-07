@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="UWOSurvivorPoolAdmin" default="build-all" basedir=".">
+	<property name="bin.dir"     value="bin" />
+    <property name="classes.dir" value="bin" />
+	<property name="dist.dir"    value="dist" />
+	<property name="dist-tmp.dir" value="dist-tmp" />
+	<property name="src.dir"     value="src" />
+	<property name="img.dir"	 value="img" />
+	
+	<property file="${projectinfo.file}" prefix="pinfo" />
+	<property name="project.name" value="${pinfo.name}" />
+	
+	<tstamp>
+		<format pattern="yyyyMMdd-HHmmss" property="build.time" />
+	</tstamp>
+	
+	<property name="output.jar.name" value="${ant.project.name}.jar" />
+	<property name="output.zip.name" value="${ant.project.name}.zip" />
+	
+	<property name="main-class"  value="application/SurvivorDriver" />
+	
+	<target name="clean">
+        <delete dir="${classes.dir}" />
+		<delete dir="${dist.dir}" />
+		<delete dir="${dist-tmp.dir}" />
+	</target>
+	
+	<target name="compile">
+		<mkdir dir="${classes.dir}" />
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false" />
+	</target>
+	
+	<target name="dist" depends="compile">
+        <mkdir dir="${dist-tmp.dir}" />
+		<mkdir dir="${dist-tmp.dir}/${bin.dir}" />
+		<jar destfile="${dist-tmp.dir}/${bin.dir}/${output.jar.name}" >
+            <zipfileset dir="${classes.dir}" prefix="" />
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+		</jar>
+		<!--  
+		<copy todir="${dist-tmp.dir}/${img.dir}">
+			<fileset dir="${img.dir}" />
+		</copy>
+		-->
+	</target>
+	
+	<target name="dist-main" depends="compile">
+        <mkdir dir="${dist.dir}" />
+		<mkdir dir="${dist.dir}" />
+		<jar destfile="${dist.dir}/${output.jar.name}" >
+            <zipfileset dir="${classes.dir}" prefix="" />
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+		</jar>
+		<copy todir="${dist.dir}/${img.dir}">
+			<fileset dir="${img.dir}" />
+		</copy>
+	</target>
+	
+	<target name="zip" depends="dist">
+		<mkdir dir="${dist.dir}" />
+		<zip destfile="${dist.dir}/${output.zip.name}">
+			<zipfileset dir="${dist-tmp.dir}" prefix="${ant.project.name}" />
+		</zip>		
+		<delete dir="${dist-tmp.dir}" />
+	</target>
+	
+	<target name="run" depends="dist">
+	    <java jar="${dist-tmp.dir}/${bin.dir}/${output.jar.name}" fork="true" />
+   	</target>
+	
+	<target name="clean-dist" depends="clean,dist" />
+	
+	<target name="clean-zip" depends="clean,zip" />
+	
+	<target name="build-all" depends="clean,dist-main" />
+	
+	<target name="main" depends="clean,run" />
+</project>
